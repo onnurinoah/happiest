@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>링크 모음</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
       padding: 20px;
+    }
+
+    /* 홈 화면 */
+    .home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
 
     .container {
@@ -28,10 +29,9 @@
 
     .title {
       text-align: center;
-      color: rgba(255, 255, 255, 0.9);
+      color: rgba(255,255,255,0.9);
       font-size: 14px;
       letter-spacing: 2px;
-      text-transform: uppercase;
       margin-bottom: 32px;
     }
 
@@ -39,95 +39,181 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255,255,255,0.15);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255,255,255,0.25);
       border-radius: 16px;
       padding: 20px 24px;
       margin-bottom: 16px;
-      text-decoration: none;
       color: white;
+      cursor: pointer;
       transition: all 0.25s ease;
     }
 
     .link-card:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255,255,255,0.25);
       transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     }
 
-    .link-card:active {
-      transform: translateY(0);
-    }
+    .link-card:active { transform: translateY(0); }
 
     .icon {
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       background: #FF0000;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
 
-    .icon svg {
-      width: 22px;
-      height: 22px;
-      fill: white;
+    .icon svg { width: 22px; height: 22px; fill: white; }
+
+    .link-text { flex: 1; }
+    .link-label { font-size: 16px; font-weight: 600; line-height: 1.4; }
+    .link-sub { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .arrow { opacity: 0.6; font-size: 18px; }
+
+    /* 영상 화면 */
+    .video-page {
+      display: none;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 0 40px;
     }
 
-    .link-text {
-      flex: 1;
+    .video-page.active { display: block; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      padding: 8px 0;
+      background: none;
+      border: none;
     }
 
-    .link-label {
+    .back-btn:hover { color: white; }
+
+    .video-title {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    .feedback-box {
+      margin-top: 24px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .feedback-question {
+      color: white;
       font-size: 16px;
       font-weight: 600;
-      line-height: 1.4;
+      margin-bottom: 14px;
     }
 
-    .link-sub {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.65);
-      margin-top: 2px;
+    .feedback-textarea {
+      width: 100%;
+      min-height: 120px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-family: inherit;
+      padding: 14px 16px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    .arrow {
-      opacity: 0.6;
-      font-size: 18px;
-    }
+    .feedback-textarea::placeholder { color: rgba(255,255,255,0.45); }
+    .feedback-textarea:focus { border-color: rgba(255,255,255,0.7); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <p class="title">영상 링크</p>
 
-    <a class="link-card" href="https://www.youtube.com/watch?v=hJsPrZdULXE" target="_blank" rel="noopener noreferrer">
-      <div class="icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-        </svg>
-      </div>
-      <div class="link-text">
-        <div class="link-label">상처를 끌어안은 사랑</div>
-        <div class="link-sub">YouTube</div>
-      </div>
-      <span class="arrow">›</span>
-    </a>
+  <!-- 홈 화면 -->
+  <div class="home" id="home">
+    <div class="container">
+      <p class="title">영상 링크</p>
 
-    <a class="link-card" href="https://www.youtube.com/watch?v=8-KDN_-5zJA" target="_blank" rel="noopener noreferrer">
-      <div class="icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-        </svg>
+      <div class="link-card" onclick="openVideo('hJsPrZdULXE', '상처를 끌어안은 사랑')">
+        <div class="icon">
+          <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </div>
+        <div class="link-text">
+          <div class="link-label">상처를 끌어안은 사랑</div>
+          <div class="link-sub">YouTube</div>
+        </div>
+        <span class="arrow">›</span>
       </div>
-      <div class="link-text">
-        <div class="link-label">최고의 행복</div>
-        <div class="link-sub">YouTube</div>
+
+      <div class="link-card" onclick="openVideo('8-KDN_-5zJA', '최고의 행복')">
+        <div class="icon">
+          <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </div>
+        <div class="link-text">
+          <div class="link-label">최고의 행복</div>
+          <div class="link-sub">YouTube</div>
+        </div>
+        <span class="arrow">›</span>
       </div>
-      <span class="arrow">›</span>
-    </a>
+    </div>
   </div>
+
+  <!-- 영상 화면 -->
+  <div class="video-page" id="videoPage">
+    <button class="back-btn" onclick="goBack()">← 목록으로</button>
+    <div class="video-title" id="videoTitle"></div>
+    <div class="video-wrapper">
+      <iframe id="videoFrame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    </div>
+    <div class="feedback-box">
+      <div class="feedback-question">이 영상을 보고 난 소감이 어떠셨나요?</div>
+      <textarea class="feedback-textarea" placeholder="자유롭게 적어주세요 :)"></textarea>
+    </div>
+  </div>
+
+  <script>
+    function openVideo(videoId, title) {
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('videoPage').classList.add('active');
+      document.getElementById('videoTitle').textContent = title;
+      document.getElementById('videoFrame').src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+      window.scrollTo(0, 0);
+    }
+
+    function goBack() {
+      document.getElementById('videoFrame').src = '';
+      document.getElementById('videoPage').classList.remove('active');
+      document.getElementById('home').style.display = 'flex';
+    }
+  </script>
+
 </body>
 </html>
