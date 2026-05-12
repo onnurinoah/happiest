@@ -612,7 +612,7 @@
         </div>
       </div>
 
-      <div class="result-section">
+      <div class="result-section" style="display:none">
         <p class="section-title">다른 제자 유형 살펴보기</p>
         <div class="disciple-grid" id="discipleGrid"></div>
       </div>
@@ -669,8 +669,8 @@ const questions = [
     options: [
       { text: '주님을 위해 앞장서고, 넘어져도 다시 일어나는 것', scores: { peter:3 } },
       { text: '주님의 사랑 안에 깊이 머물고, 그 사랑을 흘려보내는 것', scores: { john:3 } },
-      { text: '예수님이 부르신 사람들을 주님께 데려오는 것', scores: { andrew:3 } },
-      { text: '질문과 의심 속에서도 끝까지 주님을 붙드는 것', scores: { thomas:3 } },
+      { text: '드러나지 않아도 묵묵히 맡겨진 자리를 지키는 것', scores: { thaddaeus:3 } },
+      { text: '조용하지만 신실하게 주님 곁에 끝까지 남아 있는 것', scores: { jamesA:3 } },
     ]
   },
   {
@@ -703,9 +703,9 @@ const questions = [
   {
     text: "내가 신앙생활에서 자주 부딪히는 어려움은?",
     options: [
-      { text: '마음은 뜨거운데, 말이나 행동이 앞서 후회할 때가 있다.', scores: { peter:3 } },
+      { text: '열정이 앞서 다른 사람과 충돌할 때가 있다.', scores: { james:3 } },
       { text: '사랑하고 싶은데, 관계에서 상처를 깊이 받을 때가 있다.', scores: { john:3 } },
-      { text: '믿음보다 현실적인 계산이 먼저 떠오를 때가 있다.', scores: { philip:3 } },
+      { text: '불의한 상황에 분노가 격해져 폭발할 것 같을 때가 있다.', scores: { simon:3 } },
       { text: '확신하고 싶은데, 의심과 질문이 쉽게 사라지지 않을 때가 있다.', scores: { thomas:3 } },
     ]
   },
@@ -722,9 +722,9 @@ const questions = [
     text: "내가 가장 듣고 싶은 예수님의 말씀은?",
     options: [
       { text: '"넘어졌어도 괜찮다. 다시 나를 따르라."', scores: { peter:3 } },
-      { text: '"너는 내 사랑 안에 머물러라."', scores: { john:3 } },
+      { text: '"네가 조용히 한 섬김을, 내가 다 기억한다."', scores: { jamesA:3 } },
       { text: '"네가 데려온 한 사람을 내가 귀하게 여긴다."', scores: { andrew:3 } },
-      { text: '"네 질문 속에서도 나는 너를 떠나지 않았다."', scores: { thomas:3 } },
+      { text: '"네 열심을 내 나라를 위해 써라."', scores: { simon:3 } },
     ]
   },
   {
@@ -740,7 +740,7 @@ const questions = [
     text: "공동체 안에서 갈등이 생겼을 때 나는?",
     options: [
       { text: '먼저 나서서 중재하고 빠르게 해결하려 한다.', scores: { peter:2, jamesA:1 } },
-      { text: '조용히 기다리며 관계가 자연스럽게 회복되길 바란다.', scores: { john:2, jamesA:1 } },
+      { text: '조용히 기다리며 관계가 자연스럽게 회복되길 바란다.', scores: { thaddaeus:2, jamesA:1 } },
       { text: '갈등의 원인을 찬찬히 분석하고 합리적인 방법을 찾는다.', scores: { philip:2, matthew:1 } },
       { text: '잘못된 부분이 있다면 분명하게 말하고 바로잡아야 한다고 생각한다.', scores: { simon:2, bartholomew:1 } },
     ]
@@ -1034,7 +1034,26 @@ function showResult() {
     const s = questions[qIdx].options[ansIdx].scores;
     Object.entries(s).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
   });
-  const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+
+  // 각 유형의 최대 획득 가능 점수 계산 (문항당 가장 높은 점수 합산)
+  const maxScores = {};
+  questions.forEach(q => {
+    const best = {};
+    q.options.forEach(opt => {
+      Object.entries(opt.scores).forEach(([k, v]) => {
+        if (!best[k] || v > best[k]) best[k] = v;
+      });
+    });
+    Object.entries(best).forEach(([k, v]) => {
+      maxScores[k] = (maxScores[k] || 0) + v;
+    });
+  });
+
+  // 정규화된 비율로 우승자 결정
+  const winner = Object.entries(scores)
+    .map(([k, v]) => [k, v / (maxScores[k] || 1)])
+    .sort((a, b) => b[1] - a[1])[0][0];
+
   renderResult(winner);
   showScreen('result');
 }
