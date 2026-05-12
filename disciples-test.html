@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>제자유형 테스트</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #fdf8f0;
+      --card: #ffffff;
+      --gold: #c9973a;
+      --gold-light: #f0d98a;
+      --brown: #5c3d1e;
+      --text: #2d1f0f;
+      --muted: #9e8872;
+      --radius: 20px;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── SCREEN STATES ── */
+    .screen { display: none !important; }
+    .screen.active { display: block !important; }
+    #start.active { display: flex !important; }
+
+    /* ── START SCREEN ── */
+    #start {
+      background: linear-gradient(160deg, #3a1f0e 0%, #7a4a1e 50%, #c9973a 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #start::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .start-fish {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+    .start-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .start-headline {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .start-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .start-card {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .start-card p {
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .btn-start {
+      background: var(--gold-light);
+      color: var(--brown);
+      border: none;
+      border-radius: 50px;
+      padding: 16px 40px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(201,151,58,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-start:active { transform: scale(0.97); }
+
+    /* ── QUIZ SCREEN ── */
+    #quiz {
+      min-height: 100vh;
+      padding: 0 0 40px;
+    }
+
+    .quiz-header {
+      background: var(--brown);
+      padding: 16px 20px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .quiz-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .quiz-label {
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+    }
+
+    .quiz-count {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--gold-light);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .quiz-body {
+      padding: 28px 20px 0;
+    }
+
+    .question-num {
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background: var(--card);
+      border: 2px solid #e8ddd0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .option-btn:hover { border-color: var(--gold); background: #fffbf5; }
+    .option-btn.selected { border-color: var(--gold); background: #fff8e7; }
+    .option-btn:active { transform: scale(0.98); }
+
+    .option-label {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f0e8da;
+      color: var(--brown);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .option-btn.selected .option-label {
+      background: var(--gold);
+      color: #fff;
+    }
+
+    .option-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .quiz-nav {
+      padding: 24px 20px 0;
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-prev, .btn-next {
+      border-radius: 50px;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-prev {
+      flex: 1;
+      background: #e8ddd0;
+      color: var(--brown);
+    }
+    /* 결과보기 버튼: 마지막 질문에서만 표시 */
+    .btn-next {
+      flex: 2;
+      background: var(--brown);
+      color: #fff;
+      display: none;
+    }
+    .btn-next.visible { display: block; }
+    .btn-next:active { transform: scale(0.98); }
+
+    /* ── RESULT SCREEN ── */
+    #result {
+      min-height: 100vh;
+    }
+
+    .result-hero {
+      background: linear-gradient(160deg, #3a1f0e 0%, #7a4a1e 60%, #c9973a 100%);
+      padding: 40px 24px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .result-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .result-type {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .result-tagline {
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Character image frame — 흰 카드 */
+    .char-frame {
+      width: 220px;
+      height: 210px;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .char-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .char-img[src=""] { display: none; }
+
+    /* 다른 제자 보기 */
+    .disciple-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .disciple-chip {
+      background: #f0e8da;
+      border: 2px solid transparent;
+      color: var(--brown);
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .disciple-chip:hover { background: #e8ddd0; }
+    .disciple-chip.active {
+      background: var(--brown);
+      color: #fff;
+      border-color: var(--brown);
+    }
+
+    .result-body {
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .result-description {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .result-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #f0e8da;
+    }
+
+    .strength-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      background: #fff8e7;
+      border: 1px solid var(--gold-light);
+      color: var(--brown);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .chip.weak {
+      background: #fff3f0;
+      border-color: #f5c6b0;
+      color: #8b3a1e;
+    }
+
+    .result-section p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .invite-box {
+      background: linear-gradient(135deg, #3a1f0e, #7a4a1e);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(58,31,14,0.2);
+    }
+
+    .invite-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .invite-verse {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold-light);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .invite-ref {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .mission-box {
+      background: #f8f4ee;
+      border-left: 4px solid var(--gold);
+      border-radius: 0 14px 14px 0;
+      padding: 18px 20px;
+    }
+
+    .mission-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .mission-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .bible-ref {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .bible-icon {
+      font-size: 28px;
+    }
+
+    .bible-text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .bible-text strong {
+      display: block;
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .btn-retry {
+      width: 100%;
+      background: var(--brown);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+      margin-top: 8px;
+    }
+    .btn-retry:active { transform: scale(0.98); }
+
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      border-radius: 99px;
+      padding: 10px 20px;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .slide-up { animation: slideUp 0.4s ease forwards; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══ START SCREEN ══ -->
+  <div id="start" class="screen active">
+    <div class="start-fish">🐟</div>
+    <p class="start-title">제자유형 테스트</p>
+    <h1 class="start-headline">나는 예수님의<br>어떤 제자일까?</h1>
+    <div class="start-card">
+      <p>📋 &nbsp;16개의 질문<br>⏱️ &nbsp;약 5분 소요<br>🎯 &nbsp;열한 제자 중 나와 닮은 유형 발견</p>
+    </div>
+    <button class="btn-start" id="btnStart">테스트 시작하기 →</button>
+  </div>
+
+  <!-- ══ QUIZ SCREEN ══ -->
+  <div id="quiz" class="screen">
+    <div class="quiz-header">
+      <div class="quiz-meta">
+        <span class="quiz-label">나는 어떤 제자일까?</span>
+        <span class="quiz-count" id="qCount">1 / 12</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="quiz-body">
+      <p class="question-num" id="qNum">Q 01</p>
+      <p class="question-text" id="qText"></p>
+      <div class="options" id="optionsContainer"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn-prev" id="btnPrev">← 이전</button>
+      <button class="btn-next" id="btnNext">결과 보기 ✨</button>
+    </div>
+  </div>
+
+  <!-- ══ RESULT SCREEN ══ -->
+  <div id="result" class="screen">
+    <div class="result-hero">
+      <p class="result-label">당신의 제자 유형</p>
+      <p class="result-type" id="rName"></p>
+      <p class="result-tagline" id="rTagline"></p>
+      <div class="char-frame">
+        <img class="char-img" id="rCharImg" src="" alt="" />
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="result-description" id="rDesc"></div>
+
+      <div class="result-section">
+        <p class="section-title">강점</p>
+        <div class="strength-chips" id="rStrengths"></div>
+      </div>
+
+      <div class="result-section">
+        <p class="section-title">조심할 점</p>
+        <div class="strength-chips" id="rWeaks"></div>
+      </div>
+
+      <div class="invite-box">
+        <p class="invite-label">JESUS' INVITATION</p>
+        <p class="invite-verse" id="rInvite"></p>
+        <p class="invite-ref" id="rRef"></p>
+      </div>
+
+      <div class="mission-box">
+        <p class="mission-label">오늘의 제자 미션</p>
+        <p class="mission-text" id="rMission"></p>
+      </div>
+
+      <div class="bible-ref">
+        <span class="bible-icon">📖</span>
+        <div class="bible-text">
+          <strong id="rVerse"></strong>
+          <span id="rVerseRef"></span>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <p class="section-title">다른 제자 유형 살펴보기</p>
+        <div class="disciple-grid" id="discipleGrid"></div>
+      </div>
+
+      <button class="btn-retry" id="btnRetry">테스트 다시 하기 🔄</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── QUESTIONS ──
+const questions = [
+  {
+    text: "공동체에서 새로운 프로젝트를 시작하자고 할 때, 나는 보통?",
+    options: [
+      { text: '"좋아, 일단 내가 먼저 해볼게!" 하고 바로 움직인다.', scores: { peter:2, james:1 } },
+      { text: '누가 함께하면 좋을지 떠올리고 조용히 사람들을 연결한다.', scores: { andrew:2, john:1 } },
+      { text: '필요한 인원, 예산, 일정부터 계산해본다.', scores: { philip:2, matthew:1 } },
+      { text: '이 일이 정말 필요한 일인지, 방향이 맞는지 먼저 묻는다.', scores: { thomas:2, bartholomew:1 } },
+    ]
+  },
+  {
+    text: "친구가 신앙적으로 힘들다고 털어놓을 때, 나는?",
+    options: [
+      { text: '"괜찮아, 같이 기도하자. 내가 옆에 있을게."라고 바로 반응한다.', scores: { peter:2, john:1 } },
+      { text: '그 친구가 만날 만한 좋은 사람이나 공동체를 소개해준다.', scores: { andrew:2, thaddaeus:1 } },
+      { text: '친구의 이야기를 차분히 듣고, 왜 힘든지 정리해준다.', scores: { matthew:2, philip:1 } },
+      { text: '쉽게 위로하기보다, 그 친구의 질문을 같이 붙들어준다.', scores: { thomas:2, bartholomew:1 } },
+    ]
+  },
+  {
+    text: "예배나 집회에서 강한 은혜를 받았을 때 나는?",
+    options: [
+      { text: '바로 결단하고, 무언가 행동으로 옮기고 싶어진다.', scores: { peter:2, james:1 } },
+      { text: '조용히 마음에 오래 담고, 하나님과의 친밀함을 느낀다.', scores: { john:2, jamesA:1 } },
+      { text: '은혜가 좋았지만, 이걸 일상에서 어떻게 적용할지 생각한다.', scores: { philip:2, matthew:1 } },
+      { text: '감동은 있었지만, 정말 내 믿음이 된 것인지 스스로 점검한다.', scores: { thomas:2, bartholomew:1 } },
+    ]
+  },
+  {
+    text: "불의하거나 잘못된 상황을 보면 나는?",
+    options: [
+      { text: '참지 못하고 바로 말하거나 행동한다.', scores: { simon:2, peter:1 } },
+      { text: '마음은 뜨겁지만, 먼저 관계가 깨지지 않게 표현하려 한다.', scores: { john:2, andrew:1 } },
+      { text: '문제의 구조와 원인을 파악한 뒤 해결책을 생각한다.', scores: { philip:2, matthew:1 } },
+      { text: '겉으로 보이는 분노보다, 그 안에 숨은 진짜 문제를 보려 한다.', scores: { bartholomew:2, thaddaeus:1 } },
+    ]
+  },
+  {
+    text: "내게 '예수님을 따른다'는 것은 더 가깝다.",
+    options: [
+      { text: '주님을 위해 앞장서고, 넘어져도 다시 일어나는 것', scores: { peter:3 } },
+      { text: '주님의 사랑 안에 깊이 머물고, 그 사랑을 흘려보내는 것', scores: { john:3 } },
+      { text: '예수님이 부르신 사람들을 주님께 데려오는 것', scores: { andrew:3 } },
+      { text: '질문과 의심 속에서도 끝까지 주님을 붙드는 것', scores: { thomas:3 } },
+    ]
+  },
+  {
+    text: "팀 안에서 내가 가장 자연스럽게 맡는 역할은?",
+    options: [
+      { text: '분위기를 이끌고 결정을 밀어붙이는 역할', scores: { peter:2, james:1 } },
+      { text: '사람들의 마음을 살피고 관계를 이어주는 역할', scores: { john:2, andrew:1 } },
+      { text: '기록하고 정리하고 실제 운영이 되게 만드는 역할', scores: { matthew:2, philip:1 } },
+      { text: '남들이 놓치는 질문이나 위험 요소를 짚어주는 역할', scores: { thomas:2, bartholomew:1 } },
+    ]
+  },
+  {
+    text: "누군가 나를 오해하거나 인정해주지 않을 때 나는?",
+    options: [
+      { text: '속상하지만 다시 증명하고 싶어진다.', scores: { james:2, peter:1 } },
+      { text: '겉으론 괜찮은 척하지만 마음에 오래 남는다.', scores: { john:2, jamesA:1 } },
+      { text: '왜 그런 평가가 나왔는지 분석하고 고칠 점을 찾는다.', scores: { philip:2, matthew:1 } },
+      { text: '그 사람이 정말 나를 제대로 본 것인지 냉정하게 생각한다.', scores: { bartholomew:2, thomas:1 } },
+    ]
+  },
+  {
+    text: "새로운 사람을 교회나 모임에 초대할 때 나는?",
+    options: [
+      { text: '직접 가서 "한번 와 봐!"라고 적극적으로 말한다.', scores: { peter:2, simon:1 } },
+      { text: '부담스럽지 않게 자연스럽게 연결해준다.', scores: { andrew:2, john:1 } },
+      { text: '그 사람이 궁금해할 정보와 분위기를 자세히 설명해준다.', scores: { philip:2, matthew:1 } },
+      { text: '억지로 끌기보다, 그 사람이 가진 질문을 먼저 듣는다.', scores: { thomas:2, thaddaeus:1 } },
+    ]
+  },
+  {
+    text: "내가 신앙생활에서 자주 부딪히는 어려움은?",
+    options: [
+      { text: '마음은 뜨거운데, 말이나 행동이 앞서 후회할 때가 있다.', scores: { peter:3 } },
+      { text: '사랑하고 싶은데, 관계에서 상처를 깊이 받을 때가 있다.', scores: { john:3 } },
+      { text: '믿음보다 현실적인 계산이 먼저 떠오를 때가 있다.', scores: { philip:3 } },
+      { text: '확신하고 싶은데, 의심과 질문이 쉽게 사라지지 않을 때가 있다.', scores: { thomas:3 } },
+    ]
+  },
+  {
+    text: "하나님이 나를 가장 자주 다루시는 영역은?",
+    options: [
+      { text: '성급함을 믿음의 담대함으로 바꾸시는 것', scores: { peter:3 } },
+      { text: '욕심과 야망을 사명과 헌신으로 바꾸시는 것', scores: { james:3 } },
+      { text: '과거의 상처와 부끄러움을 은혜의 이야기로 바꾸시는 것', scores: { matthew:3 } },
+      { text: '분노와 정의감을 하나님 나라의 열망으로 바꾸시는 것', scores: { simon:3 } },
+    ]
+  },
+  {
+    text: "내가 가장 듣고 싶은 예수님의 말씀은?",
+    options: [
+      { text: '"넘어졌어도 괜찮다. 다시 나를 따르라."', scores: { peter:3 } },
+      { text: '"너는 내 사랑 안에 머물러라."', scores: { john:3 } },
+      { text: '"네가 데려온 한 사람을 내가 귀하게 여긴다."', scores: { andrew:3 } },
+      { text: '"네 질문 속에서도 나는 너를 떠나지 않았다."', scores: { thomas:3 } },
+    ]
+  },
+  {
+    text: "내가 꿈꾸는 제자의 모습은?",
+    options: [
+      { text: '예수님을 위해 담대히 앞장서는 사람', scores: { peter:2, james:1 } },
+      { text: '사랑으로 사람을 살리고 품는 사람', scores: { john:2, andrew:1 } },
+      { text: '맡겨진 자리에서 신실하게 기록하고 섬기는 사람', scores: { matthew:2, jamesA:1 } },
+      { text: '세상의 아픔과 질문 앞에서 하나님 나라를 붙드는 사람', scores: { thomas:2, simon:1 } },
+    ]
+  },
+  {
+    text: "공동체 안에서 갈등이 생겼을 때 나는?",
+    options: [
+      { text: '먼저 나서서 중재하고 빠르게 해결하려 한다.', scores: { peter:2, jamesA:1 } },
+      { text: '조용히 기다리며 관계가 자연스럽게 회복되길 바란다.', scores: { john:2, jamesA:1 } },
+      { text: '갈등의 원인을 찬찬히 분석하고 합리적인 방법을 찾는다.', scores: { philip:2, matthew:1 } },
+      { text: '잘못된 부분이 있다면 분명하게 말하고 바로잡아야 한다고 생각한다.', scores: { simon:2, bartholomew:1 } },
+    ]
+  },
+  {
+    text: "나에게 가장 힘이 되는 신앙의 시간은?",
+    options: [
+      { text: '새벽기도나 혼자 조용히 주님과 대화하는 시간', scores: { jamesA:2, john:1 } },
+      { text: '소그룹에서 서로의 이야기를 나누고 기도받는 시간', scores: { thaddaeus:2, andrew:1 } },
+      { text: '찬양집회나 부흥회에서 뜨겁게 예배하는 시간', scores: { peter:2, james:1 } },
+      { text: '혼자 성경을 깊이 읽고 묵상하며 메모하는 시간', scores: { bartholomew:2, matthew:1 } },
+    ]
+  },
+  {
+    text: "내가 믿음을 표현하는 방식에 더 가깝다.",
+    options: [
+      { text: '행동으로 — 봉사, 전도, 프로젝트로 나타낸다.', scores: { peter:2, james:1 } },
+      { text: '관계로 — 곁에 있어주고 사랑으로 나타낸다.', scores: { john:2, andrew:1 } },
+      { text: '탐구로 — 더 깊이 알고 싶어 질문하고 찾는다.', scores: { thomas:2, thaddaeus:1 } },
+      { text: '기록으로 — 묵상일기, 감사노트, 삶의 고백으로 나타낸다.', scores: { matthew:2, jamesA:1 } },
+    ]
+  },
+  {
+    text: "세상을 바라볼 때 내 마음에 더 가깝다.",
+    options: [
+      { text: '복음이 필요한 땅이다. 나가서 전해야 한다.', scores: { andrew:2, peter:1 } },
+      { text: '불의로 가득하다. 하나님 나라의 정의가 임해야 한다.', scores: { simon:2, james:1 } },
+      { text: '복잡하다. 분별하며 지혜롭게 살아가야 한다.', scores: { bartholomew:2, philip:1 } },
+      { text: '하나님이 일하고 계신다. 그 흔적을 기록하고 싶다.', scores: { matthew:2, jamesA:1 } },
+    ]
+  },
+];
+
+// ── RESULTS DATA ──
+const results = {
+  peter: {
+    name: '베드로형',
+    img: 'chars/peter.png',
+    tagline: '넘어져도 다시 예수님께 뛰어가는 열정형 제자',
+    description: '마음이 뜨겁고 반응이 빠른 사람입니다. 누군가 머뭇거릴 때 먼저 손을 들고, 공동체가 멈춰 있을 때 분위기를 움직이는 힘이 있습니다. 예수님을 향한 고백도 빠르고, 행동도 빠릅니다.\n\n하지만 때로는 마음이 앞서 말이 먼저 나가거나, 실패 후 자신을 심하게 몰아붙일 수 있습니다. 예수님은 그런 당신에게 완벽함보다 회복을 가르치십니다.',
+    strengths: ['추진력', '열정적 고백', '행동력', '리더십'],
+    weaknesses: ['성급함', '감정 기복', '실패 후 자책'],
+    invite: '"네가 나를 사랑하느냐? 그렇다면 다시 내 양을 먹이라."',
+    inviteRef: '요한복음 21:17',
+    mission: '오늘 하루, 앞서기 전에 한 번 더 기도하고 움직여보세요.',
+    verse: '베드로가 배에서 내려 물 위로 걸어서 예수께로 가되',
+    verseRef: '마태복음 14:29',
+  },
+  john: {
+    name: '요한형',
+    img: 'chars/john.png',
+    tagline: '사랑으로 머물고 흘려보내는 친밀형 제자',
+    description: '깊은 감수성과 진한 충성심을 가진 사람입니다. 관계의 질을 중요하게 여기며, 예수님과의 친밀함 속에 오래 머물 줄 압니다. 사람을 사랑할 때 온 마음을 다합니다.\n\n그러나 때로는 감정에 깊이 몰입하거나, 특정 관계에 지나치게 의존할 수 있습니다. 예수님은 당신을 통해 사랑이 흘러넘치기를 원하십니다.',
+    strengths: ['깊은 사랑', '충성', '영적 감수성', '친밀감'],
+    weaknesses: ['감정 몰입', '독점적 친밀감', '내면화'],
+    invite: '"서로 사랑하라. 내가 너희를 사랑한 것 같이."',
+    inviteRef: '요한복음 13:34',
+    mission: '오늘 가까운 사람에게 먼저 사랑한다고 표현해보세요.',
+    verse: '예수께서 사랑하시는 자도 거기 서 있는 것을 보고',
+    verseRef: '요한복음 19:26',
+  },
+  james: {
+    name: '야고보형',
+    img: 'chars/james.png',
+    tagline: '비전과 헌신으로 앞만 보는 강한 추진형 제자',
+    description: '담대하고 사명감이 강한 사람입니다. 크게 쓰임받고 싶은 열망이 있고, 의미 있는 일에 자신을 던질 준비가 되어 있습니다. 예수님을 향한 헌신이 뜨겁습니다.\n\n때로는 욕망과 사명이 뒤섞여 경쟁심이나 조급함이 나타날 수 있습니다. 예수님은 당신의 열망을 낮아지는 섬김으로 빚어가십니다.',
+    strengths: ['담대함', '헌신', '사명감', '돌파력'],
+    weaknesses: ['야망', '경쟁심', '조급함'],
+    invite: '"누구든지 크고자 하는 자는 너희를 섬기는 자가 되어야 하리라."',
+    inviteRef: '마태복음 20:26',
+    mission: '오늘 내 야망이 아닌, 주님의 뜻을 구하는 기도를 드려보세요.',
+    verse: '세베대의 아들들을 부르시니 즉시 그물과 아버지를 버려두고 따르니라',
+    verseRef: '마태복음 4:21-22',
+  },
+  andrew: {
+    name: '안드레형',
+    img: 'chars/andrew.png',
+    tagline: '사람을 조용히 연결하는 따뜻한 초대형 제자',
+    description: '앞에 서지 않아도 좋은 사람을 좋은 곳에 데려가는 능력이 있습니다. 전도적 감수성과 배려심이 깊고, 자신보다 상대의 필요를 먼저 봅니다. 작은 연결이 큰 열매를 맺습니다.\n\n때로는 주목받지 못해 지칠 수 있고, 자기표현을 너무 아낄 수 있습니다. 예수님은 당신의 조용한 연결을 소중히 여기십니다.',
+    strengths: ['연결', '전도적 감수성', '배려', '섬김'],
+    weaknesses: ['주목받지 못함', '자기표현 부족'],
+    invite: '"네가 데려온 한 사람을 내가 귀하게 여긴다."',
+    inviteRef: '요한복음 1:42 (의역)',
+    mission: '오늘 한 사람을 좋은 모임이나 예배로 초대해보세요.',
+    verse: '그가 먼저 자기의 형제 시몬을 찾아 예수를 만났다 하고 데리고 예수께 오니',
+    verseRef: '요한복음 1:41-42',
+  },
+  philip: {
+    name: '빌립형',
+    img: 'chars/philip.png',
+    tagline: '현실을 꼼꼼히 계산하는 실무형 제자',
+    description: '현실적이고 분석적인 사람입니다. 일이 실제로 돌아가게 만드는 능력이 있고, 준비성이 철저합니다. 섣부른 결정보다 충분한 검토를 선호합니다.\n\n그러나 믿음보다 계산이 앞서 가능성을 스스로 제한할 수 있습니다. 예수님은 당신의 현실감각을 기적의 도구로 사용하십니다.',
+    strengths: ['현실감각', '분석력', '준비성', '실행력'],
+    weaknesses: ['믿음보다 계산', '가능성 제한'],
+    invite: '"내가 이미 여기 있는데 그것으로 충분하지 않느냐?"',
+    inviteRef: '요한복음 6:7 (의역)',
+    mission: '오늘 "어떻게 될까" 대신 "주님이 하실까"를 묻는 기도를 드려보세요.',
+    verse: '오병이어로 오천 명을 먹이신 기적에서 200데나리온도 부족하다 한 자',
+    verseRef: '요한복음 6:7',
+  },
+  bartholomew: {
+    name: '바돌로매/나다나엘형',
+    img: 'chars/bartholomew.png',
+    tagline: '진정성과 분별로 진짜를 찾는 정직형 제자',
+    description: '겉모습보다 본질을 봅니다. 진심이 아닌 것에는 마음을 열기 어렵지만, 한번 확인하면 깊이 신뢰합니다. 분별력이 강하고 순수함이 있습니다.\n\n처음엔 선입견으로 인해 기회를 놓칠 수 있습니다. 예수님은 당신의 정직함 속에서 "진짜 이스라엘 사람"이라 부르셨습니다.',
+    strengths: ['정직', '분별력', '순수함', '진실 추구'],
+    weaknesses: ['선입견', '쉽게 마음 열지 않음'],
+    invite: '"보라, 이는 참으로 이스라엘 사람이라."',
+    inviteRef: '요한복음 1:47',
+    mission: '오늘 나의 선입견 하나를 내려놓고 새 눈으로 사람을 바라보세요.',
+    verse: '빌립이 이르되 와서 보라 하니라',
+    verseRef: '요한복음 1:46',
+  },
+  thomas: {
+    name: '도마형',
+    img: 'chars/thomas.png',
+    tagline: '의심을 숨기지 않고 진짜 믿음을 찾는 탐구형 제자',
+    description: '쉽게 믿는 척하지 않는 사람입니다. 질문이 있고, 확인하고 싶고, 진짜가 아니면 마음을 주기 어렵습니다. 그래서 때로는 믿음이 약해 보일 수 있지만, 사실 당신은 진실한 믿음을 원합니다.\n\n예수님은 질문하는 당신을 밀어내지 않으십니다. 오히려 상처 난 손을 보여주시며, 질문의 자리까지 찾아오십니다.',
+    strengths: ['솔직함', '깊은 질문', '실존적 믿음', '탐구정신'],
+    weaknesses: ['의심', '확신 지연', '부정적 상상'],
+    invite: '"믿음 없는 자가 되지 말고 믿는 자가 되라."',
+    inviteRef: '요한복음 20:27',
+    mission: '오늘 당신 안에 있는 질문 하나를 하나님께 솔직히 말해보세요.',
+    verse: '나의 주님이시요 나의 하나님이시니이다',
+    verseRef: '요한복음 20:28',
+  },
+  matthew: {
+    name: '마태형',
+    img: 'chars/matthew.png',
+    tagline: '과거를 넘어 새 삶을 사는 전환형 제자',
+    description: '변화의 가능성을 가장 깊이 이해하는 사람입니다. 세밀하게 관찰하고 기록하는 능력이 있으며, 은혜가 무엇인지 온몸으로 압니다. 과거가 어떠했든 지금 예수님이 부르신다면 그것으로 충분합니다.\n\n때로는 과거의 죄책감이나 소외감이 앞을 막을 수 있습니다. 예수님은 당신의 과거를 지우는 것이 아니라, 그 안에서 복음을 쓰십니다.',
+    strengths: ['변화 이해', '관찰력', '기록', '은혜 감수성'],
+    weaknesses: ['과거 죄책감', '소외감', '거리감'],
+    invite: '"건강한 자에게는 의사가 쓸 데 없고 병든 자에게 쓸 데 있느니라."',
+    inviteRef: '마태복음 9:12',
+    mission: '오늘 나의 과거를 하나님의 은혜 이야기로 다시 써보세요.',
+    verse: '예수께서 마태라 하는 사람이 세관에 앉아 있는 것을 보시고 나를 따르라 하시니',
+    verseRef: '마태복음 9:9',
+  },
+  jamesA: {
+    name: '야고보 알패오의 아들형',
+    img: 'chars/james-a.png',
+    tagline: '드러나지 않아도 자리를 지키는 충성형 제자',
+    description: '조용하지만 신실한 사람입니다. 크게 드러나진 않아도 맡은 자리를 묵묵히 지키는 힘이 있습니다. 꾸준함과 겸손함이 당신의 가장 큰 강점입니다.\n\n인정받지 못할 때 존재감에 대한 갈증이 생길 수 있습니다. 예수님은 드러나지 않는 충성을 하나도 놓치지 않으십니다.',
+    strengths: ['꾸준함', '겸손', '신실함', '묵묵한 헌신'],
+    weaknesses: ['존재감 부족', '인정 결핍'],
+    invite: '"잘하였도다, 충성된 종아."',
+    inviteRef: '마태복음 25:21',
+    mission: '오늘 아무도 모르는 선한 일 하나를 조용히 해보세요.',
+    verse: '열두 사도의 이름은 이러하니',
+    verseRef: '마태복음 10:2-3',
+  },
+  thaddaeus: {
+    name: '다대오형',
+    img: 'chars/thaddaeus.png',
+    tagline: '공동체를 사랑하며 질문하는 충성형 제자',
+    description: '예수님의 뜻을 진심으로 알고 싶어하는 사람입니다. 공동체를 사랑하고, 궁금한 것을 그냥 넘기지 않습니다. 이해가 되어야 마음이 움직이는 유형입니다.\n\n때로는 이해되지 않으면 답답함이 앞설 수 있습니다. 예수님은 당신의 진지한 질문을 통해 깊은 진리를 드러내십니다.',
+    strengths: ['공동체 사랑', '질문', '진실 탐구', '충성'],
+    weaknesses: ['답답함', '이해 안 되면 멈춤'],
+    invite: '"나를 사랑하는 자는 내 아버지께 사랑을 받을 것이요."',
+    inviteRef: '요한복음 14:21',
+    mission: '오늘 이해 안 되는 것 하나를 하나님께 솔직히 여쭤보세요.',
+    verse: '유다가 이르되 주여 어찌하여 자기를 세상에는 나타내지 아니하려 하시나이까',
+    verseRef: '요한복음 14:22',
+  },
+  simon: {
+    name: '시몬 젤롯형',
+    img: 'chars/simon.png',
+    tagline: '정의와 열망으로 세상을 바꾸려는 급진형 제자',
+    description: '세상이 바뀌어야 한다고 믿는 사람입니다. 불의 앞에서 타협하지 않고, 하나님 나라에 대한 강렬한 열망이 있습니다. 변화를 위해 기꺼이 대가를 치릅니다.\n\n분노가 앞서거나, 이분법적으로 세상을 볼 때 관계가 깨질 수 있습니다. 예수님은 당신의 열정을 하나님 나라의 방식으로 빚어가십니다.',
+    strengths: ['열정', '정의감', '변화 의지', '헌신'],
+    weaknesses: ['분노', '이분법적 사고', '과격함'],
+    invite: '"검을 거두라. 내 나라는 이 세상에 속한 것이 아니니라."',
+    inviteRef: '요한복음 18:36 (의역)',
+    mission: '오늘 분노 대신 기도로, 정의를 위한 한 걸음을 내딛어보세요.',
+    verse: '셀롯이라는 시몬도 있었더라',
+    verseRef: '누가복음 6:15',
+  },
+};
+
+// ── STATE ──
+let scores = {};
+let answers = new Array(questions.length).fill(null);
+let currentQ = 0;
+
+function initScores() {
+  scores = { peter:0, john:0, james:0, andrew:0, philip:0, bartholomew:0, thomas:0, matthew:0, jamesA:0, thaddaeus:0, simon:0 };
+}
+
+// ── SCREENS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
+  const el = document.getElementById(id);
+  el.style.display = '';
+  el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  initScores();
+  answers.fill(null);
+  currentQ = 0;
+  renderQuestion();
+  showScreen('quiz');
+}
+
+function retryQuiz() {
+  showScreen('start');
+}
+
+// ── RENDER QUESTION ──
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('qCount').textContent = `${currentQ + 1} / ${questions.length}`;
+  document.getElementById('qNum').textContent = `Q ${String(currentQ + 1).padStart(2, '0')}`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('progressFill').style.width = `${((currentQ) / questions.length) * 100}%`;
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn slide-up';
+    btn.style.animationDelay = `${idx * 0.05}s`;
+    if (answers[currentQ] === idx) btn.classList.add('selected');
+    btn.innerHTML = `
+      <span class="option-label">${labels[idx]}</span>
+      <span class="option-text">${opt.text}</span>
+    `;
+    btn.addEventListener('click', () => selectOption(idx));
+    container.appendChild(btn);
+  });
+
+  updateNextBtn();
+
+  // prev button
+  const prevBtn = document.querySelector('.btn-prev');
+  prevBtn.style.display = currentQ === 0 ? 'none' : '';
+}
+
+function selectOption(idx) {
+  answers[currentQ] = idx;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === idx);
+    btn.style.pointerEvents = 'none'; // 중복 클릭 방지
+  });
+  updateNextBtn();
+
+  const isLast = currentQ === questions.length - 1;
+  if (!isLast) {
+    // 중간 질문: 400ms 후 자동 넘김
+    setTimeout(() => nextQ(), 380);
+  }
+  // 마지막 질문: '결과 보기' 버튼이 나타남
+}
+
+function updateNextBtn() {
+  const btn = document.getElementById('btnNext');
+  const isLast = currentQ === questions.length - 1;
+  // 결과보기 버튼은 마지막 질문 + 답변 선택 시에만 표시
+  if (isLast && answers[currentQ] !== null) {
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+}
+
+function nextQ() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+  }
+}
+
+// ── CALCULATE RESULT ──
+function showResult() {
+  initScores();
+  answers.forEach((ansIdx, qIdx) => {
+    if (ansIdx === null) return;
+    const s = questions[qIdx].options[ansIdx].scores;
+    Object.entries(s).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
+  });
+  const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  renderResult(winner);
+  showScreen('result');
+}
+
+function renderResult(key) {
+  const data = results[key];
+  document.getElementById('rName').textContent = data.name;
+  document.getElementById('rTagline').textContent = data.tagline;
+  document.getElementById('rCharImg').src = data.img || '';
+  document.getElementById('rDesc').innerHTML = data.description.replace(/\n\n/g, '<br><br>');
+  document.getElementById('rStrengths').innerHTML = data.strengths.map(s => `<span class="chip">${s}</span>`).join('');
+  document.getElementById('rWeaks').innerHTML = data.weaknesses.map(w => `<span class="chip weak">${w}</span>`).join('');
+  document.getElementById('rInvite').textContent = data.invite;
+  document.getElementById('rRef').textContent = data.inviteRef;
+  document.getElementById('rMission').textContent = data.mission;
+  document.getElementById('rVerse').textContent = data.verse;
+  document.getElementById('rVerseRef').textContent = data.verseRef;
+
+  // 다른 제자 버튼 렌더링
+  const grid = document.getElementById('discipleGrid');
+  grid.innerHTML = Object.entries(results).map(([k, d]) =>
+    `<button class="disciple-chip${k === key ? ' active' : ''}" data-key="${k}">${d.name}</button>`
+  ).join('');
+  grid.querySelectorAll('.disciple-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      renderResult(btn.dataset.key);
+      window.scrollTo(0, 0);
+    });
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnStart').addEventListener('click', startQuiz);
+  document.getElementById('btnPrev').addEventListener('click', prevQ);
+  document.getElementById('btnNext').addEventListener('click', nextQ);
+  document.getElementById('btnRetry').addEventListener('click', retryQuiz);
+});
+</script>
+</body>
+</html>
